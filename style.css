@@ -1,0 +1,126 @@
+/* =========================================
+   1. Variáveis Globais (全局变量 - 临床安抚色盘)
+   ========================================= */
+:root {
+  /* 基础色：彻底抛弃纯白，使用带有温度的灰白色，保护疲劳的眼睛 */
+  --bg-color: #F4F7F6; 
+  /* 文本色：深石板灰，比纯黑更柔和 */
+  --text-color: #2C3E50; 
+  /* 品牌主色调/安抚色：低饱和度的青蓝色 (Azul ciano) */
+  --primary-color: #4CA1AF; 
+  
+  /* * 核心心理学机制：Botão de Pânico (恐慌按钮) 的颜色
+   * 绝对不能用亮红色 (Vermelho vivo)，那会激活大脑的“战斗或逃跑”压力机制。
+   * 我们使用一种温暖但不刺眼的“琥珀橙 (Laranja âmbar)”，代表“警告但安全”。
+   */
+  --panic-color: #E67E22; 
+  
+  /* 底部安全区，适配现代 iPhone/Android 的小白条 */
+  --safe-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* =========================================
+   2. Reset & Comportamento Nativo (重置与原生行为)
+   ========================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  /* 核心：禁止长按选中文本，这会让它摸起来像个真正的 App */
+  user-select: none; 
+  -webkit-user-select: none;
+  /* 核心：消除安卓浏览器点击按钮时的默认灰色闪烁 */
+  -webkit-tap-highlight-color: transparent; 
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  overflow: hidden; /* 防止整个页面出现原生滚动条 */
+  height: 100vh;
+  width: 100vw;
+}
+
+/* =========================================
+   3. Estrutura do Layout (布局结构 - CSS Grid/Flexbox)
+   ========================================= */
+#app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#app-header {
+  padding: 20px;
+  text-align: center;
+  /* 轻微的阴影 (Sombra leve) 区分层级 */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+  background-color: white;
+  z-index: 10;
+}
+
+#main-content {
+  flex: 1;
+  overflow-y: auto; /* 仅允许中间内容区域滚动 */
+  padding: 20px;
+  /* 平滑滚动的原生体验 */
+  -webkit-overflow-scrolling: touch; 
+}
+
+/* =========================================
+   4. Barra de Navegação Inferior (底部导航栏)
+   ========================================= */
+#bottom-bar {
+  display: flex;
+  justify-content: space-around;
+  background-color: white;
+  padding-top: 10px;
+  padding-bottom: var(--safe-bottom); /* 适配全面屏底部 */
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  z-index: 10;
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  color: #95A5A6;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-item.active {
+  color: var(--primary-color);
+}
+
+/* =========================================
+   5. Botão de Pânico (恐慌急救按钮 - FAB)
+   ========================================= */
+.fab-button {
+  position: fixed;
+  /* 锚定在右下角，避开底部导航栏 (Ancorado no canto inferior direito) */
+  bottom: calc(var(--safe-bottom) + 70px); 
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--panic-color);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+  z-index: 100; /* 极高的层级，确保永远可见 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 按下时的微交互反馈 */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fab-button:active {
+  transform: scale(0.95); /* 按下时稍微缩小，真实的物理触感 */
+  box-shadow: 0 2px 8px rgba(230, 126, 34, 0.4);
+}
