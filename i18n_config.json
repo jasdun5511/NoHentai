@@ -1,0 +1,29 @@
+{
+  "pt-BR": {
+    "app_meta": {
+      "stealth_name": "Foco Matinal", 
+      "description": "Seu rastreador de hábitos offline." 
+    },
+    "ui_elements": {
+      "panic_button": "Emergência", 
+      "relapse_log": "Diário de Recaída", 
+      "vitality_score": "Sua Vitalidade" 
+    },
+    "cbt_messages": {
+      "flatline_warning": "Fase de Estabilização. O cansaço é normal, seu cérebro está se curando."
+    },
+    "monetization": {
+      "pix_cta": "Desbloquear com PIX (Copia e Cola)",
+      "lifetime_access": "Acesso Vitalício" 
+    }
+  },
+  "en-US": {
+    "app_meta": {
+      "stealth_name": "Morning Focus"
+    },
+    "monetization": {
+      "stripe_cta": "Subscribe via Apple Pay",
+      "monthly_access": "Monthly Premium"
+    }
+  }
+}
