@@ -29,45 +29,78 @@ document.addEventListener('DOMContentLoaded', async () => {
         mainContentEl.innerHTML = '<p style="color: red; text-align: center;">Erro ao acessar o banco de dados local. (读取本地数据库失败)</p>';
     }
 
-    // --- 核心渲染函数 ---
+// --- 核心仪表盘渲染函数 (Renderização do Painel Principal) ---
     function renderMainDashboard(days, score) {
-        // 使用 JavaScript 动态向 <main> 标签内注入卡片 HTML
+        // 1. 动态生成核心卡片的 HTML 结构
         mainContentEl.innerHTML = `
             <div style="background: white; padding: 30px 20px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                 <h2 style="color: var(--primary-color); font-size: 64px; margin-bottom: 5px; font-weight: 800;">${days}</h2>
                 <p style="color: #7f8c8d; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Dias de Foco</p>
                 <p style="font-size: 12px; color: #bdc3c7; margin-top: 5px;">(专注天数)</p>
                 
-                <button id="btn-relapse" style="margin-top: 40px; background: transparent; border: 1.5px solid #e74c3c; color: #e74c3c; padding: 12px 20px; border-radius: 12px; font-weight: bold; width: 100%; font-size: 16px;">
+                <button id="btn-relapse" style="margin-top: 40px; background: transparent; border: 1.5px solid #e74c3c; color: #e74c3c; padding: 12px 20px; border-radius: 12px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer;">
                     Registrar Recaída (记录破戒)
                 </button>
             </div>
+            
+            <div id="dynamic-stage-container"></div>
         `;
 
-        // 给刚刚生成的破戒按钮绑定点击事件 (Vincular evento de clique)
+        // 2. 给刚生成的破戒按钮绑定点击事件
         document.getElementById('btn-relapse').addEventListener('click', () => handleRelapse(score));
+
+        // 3. 立即调用状态机，根据天数渲染下方的心理干预科普卡片
+        applyDynamicUI(days);
     }
 
-    // --- 核心游戏化防流失逻辑 (Lógica de gamificação) ---
-    async function handleRelapse(currentScore) {
-        // 弹出原生确认框，给予用户最后一次后悔的机会
-        const confirmRelapse = confirm("Tem certeza? Sua vitalidade será reduzida, mas você NÃO voltará ao zero. (确定要记录破戒吗？生命力会降低，但绝对不会归零！)");
-        
-        if (confirmRelapse) {
-            // 实例化心理学计分系统
-            const vitalitySystem = new VitalityScore(currentScore);
-            
-            // 假设记录一次中度破戒 (Gravidade média)，按照我们之前的设计，扣除 25% 的分数
-            const newScore = vitalitySystem.recordRelapse('MÉDIA');
-            
-            // 更新数据库里的存档
-            const userData = await getUserProfile();
-            userData.vitalityScore = newScore;
-            // 注意：这里我们故意不重置 startDateTimestamp，保护天数不断！
-            await saveUserProfile(userData);
-            
-            // 重新刷新页面以展现扣分结果 (Recarregar a página)
-            window.location.reload();
+    // --- 第 4 阶段核心：时间线状态机与动态渲染 (Lógica de Máquina de Estados) ---
+    function applyDynamicUI(days) {
+        const stageContainer = document.getElementById('dynamic-stage-container');
+        let stageInfo = {};
+
+        if (days <= 7) {
+            // 阶段 1：戒断与觉醒期
+            stageInfo = {
+                title: "Fase de Abstinência (戒断防御期)",
+                color: "#e67e22", 
+                icon: "🛡️",
+                message: "O cérebro está exigindo dopamina. Os impulsos são fortes, mas temporários. Mantenha a guarda alta. (多巴胺极度渴望，保持警惕)"
+            };
+        } else if (days <= 14) {
+            // 阶段 2：能量激增期
+            stageInfo = {
+                title: "Pico de Energia (能量激增期)",
+                color: "#f39c12", 
+                icon: "⚡",
+                message: "Níveis hormonais flutuando. Canalize essa energia para um treino pesado ou foco nos estudos. (将过剩的能量转化为运动或学习)"
+            };
+        } else if (days <= 60) {
+            // 阶段 3：平缓抑郁期 (Flatline)
+            stageInfo = {
+                title: "Fase de Estabilização (平缓修复期)",
+                color: "#3498db", 
+                icon: "🧠",
+                message: "A névoa mental é normal agora. O cérebro está reestruturando os receptores. Descanse sem culpa. (脑雾是正常的受体重组现象，允许自己休息)"
+            };
+            // 改变全局背景色，变得更加柔和
+            document.body.style.backgroundColor = "#e8f4f8"; 
+        } else {
+            // 阶段 4：稳态平衡期
+            stageInfo = {
+                title: "Equilíbrio (稳态掌控期)",
+                color: "#2ecc71", 
+                icon: "🌱",
+                message: "Receptores restaurados. A clareza mental voltou. Continue esculpindo seus objetivos. (受体已恢复，继续雕琢你的长期目标)"
+            };
         }
+
+        // 注入科普卡片 HTML
+        stageContainer.innerHTML = `
+            <div style="background-color: ${stageInfo.color}15; border-left: 4px solid ${stageInfo.color}; padding: 20px; margin-top: 25px; border-radius: 8px;">
+                <h3 style="color: ${stageInfo.color}; font-size: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <span>${stageInfo.icon}</span> ${stageInfo.title}
+                </h3>
+                <p style="font-size: 14px; color: #555; line-height: 1.5;">${stageInfo.message}</p>
+            </div>
+        `;
     }
-});
