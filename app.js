@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         mainContentEl.innerHTML = '<p style="color: red;">Erro ao acessar banco de dados.</p>';
     }
 
-    function renderMainDashboard(days, score) {
+  function renderMainDashboard(days, score) {
         mainContentEl.innerHTML = `
             <div style="background: white; padding: 30px 20px; border-radius: 16px; text-align: center; margin-top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                 <h2 style="color: var(--primary-color); font-size: 64px; margin-bottom: 5px; font-weight: 800;">${days}</h2>
@@ -49,12 +49,75 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             
             <div id="dynamic-stage-container"></div>
+
+            <div class="heatmap-container">
+                <h3 class="heatmap-title">Seu Histórico (历史记录)</h3>
+                <div class="heatmap-grid" id="heatmap-grid"></div>
+            </div>
         `;
 
-        document.getElementById('btn-relapse').addEventListener('click', () => handleRelapse(score));
+        document.getElementById('btn-relapse').addEventListener('click', () => showRelapseModal(score));
         applyDynamicUI(days);
+        renderHeatmap(days); // 渲染热力图
     }
 
+    // --- 第 6 阶段：渲染热力图 (Renderizar Mapa de Calor) ---
+    function renderHeatmap(currentDays) {
+        const gridEl = document.getElementById('heatmap-grid');
+        const totalBoxes = 84; // 12 周 x 7 天
+        
+        let html = '';
+        for (let i = 1; i <= totalBoxes; i++) {
+            // 简单逻辑：如果你坚持了20天，前20个格子就是绿色的
+            if (i <= currentDays) {
+                html += `<div class="day-box success"></div>`;
+            } else {
+                html += `<div class="day-box"></div>`;
+            }
+        }
+        gridEl.innerHTML = html;
+    }
+
+    // --- 第 6 阶段：结构化问卷逻辑 (Lógica do Questionário) ---
+    const relapseModal = document.getElementById('relapse-modal');
+    let selectedTrigger = null;
+
+    function showRelapseModal(currentScore) {
+        relapseModal.classList.add('active');
+        
+        // 绑定触发器按钮的选择效果
+        const triggerBtns = document.querySelectorAll('.trigger-btn');
+        triggerBtns.forEach(btn => {
+            btn.onclick = () => {
+                triggerBtns.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedTrigger = btn.getAttribute('data-trigger');
+            };
+        });
+
+        // 取消按钮
+        document.getElementById('cancel-relapse-btn').onclick = () => {
+            relapseModal.classList.remove('active');
+        };
+
+        // 确认提交按钮
+        document.getElementById('confirm-relapse-btn').onclick = async () => {
+            if (!selectedTrigger) {
+                alert('Por favor, selecione um gatilho. (请选择诱发原因)');
+                return;
+            }
+            // 执行扣分逻辑
+            const vitalitySystem = new VitalityScore(currentScore);
+            const newScore = vitalitySystem.recordRelapse('MÉDIA');
+            const userData = await getUserProfile();
+            userData.vitalityScore = newScore;
+            
+            // 未来可将 selectedTrigger 存入 database 的 relapse_logs 数组中
+            
+            await saveUserProfile(userData);
+            window.location.reload();
+        };
+    }
     function applyDynamicUI(days) {
         const stageContainer = document.getElementById('dynamic-stage-container');
         let stageInfo = {};
