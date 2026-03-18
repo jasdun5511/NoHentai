@@ -1,100 +1,69 @@
 console.log('[Sistema] Carregando app.js... (正在加载主程序)');
 
-// ==========================================
-// Foco Matinal - Motor Principal (主引擎)
-// ==========================================
-
-// ⚠️ 致命警告：如果你的 GitHub 里没有 database.js 和 psychology_domain.js 这两个文件，
-// 这两行 import 代码会让整个页面瞬间崩溃变成白屏！(Erro 404 Not Found)
 import { getUserProfile, saveUserProfile, calculateContinuousDays } from './database.js';
 import { VitalityScore } from './psychology_domain.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('[Sistema] DOM carregado. Iniciando motor... (DOM已加载，系统启动)');
+// ==========================================
+// 第 9 阶段：全局 Toast 提示引擎
+// ==========================================
+function showToast(message) {
+    let toastEl = document.getElementById('custom-toast');
+    if (!toastEl) {
+        toastEl = document.createElement('div');
+        toastEl.id = 'custom-toast';
+        toastEl.className = 'toast-notification';
+        document.body.appendChild(toastEl);
+    }
+    toastEl.innerText = message;
+    toastEl.classList.add('show');
+    setTimeout(() => toastEl.classList.remove('show'), 3000);
+}
 
-    // 1. 获取全局 DOM 节点
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('[Sistema] Motor iniciado.');
+
     const scoreValueEl = document.getElementById('score-value');
     const mainContentEl = document.getElementById('main-content');
-    
-    // 急救模块节点
     const panicBtn = document.getElementById('panic-btn');
     const panicOverlay = document.getElementById('panic-overlay');
     const closePanicBtn = document.getElementById('close-panic-btn');
-    
-    // 问卷弹窗节点
     const relapseModal = document.getElementById('relapse-modal');
 
-    // 全局状态变量
     let currentDays = 0;
     let currentScore = 100;
 
-    // ==========================================
-    // 第 5 阶段：急救干预逻辑 (Modo de Emergência)
-    // ==========================================
+    // --- 第 5 阶段：急救模块 ---
     if (panicBtn && panicOverlay && closePanicBtn) {
-        panicBtn.addEventListener('click', () => {
-            panicOverlay.classList.remove('hidden');
-            console.log('[Sistema] Emergência ativada! (急救激活)');
-        });
-
-        closePanicBtn.addEventListener('click', () => {
-            panicOverlay.classList.add('hidden');
-        });
+        panicBtn.addEventListener('click', () => panicOverlay.classList.remove('hidden'));
+        closePanicBtn.addEventListener('click', () => panicOverlay.classList.add('hidden'));
     }
 
-    // ==========================================
-    // 第 7 阶段：底部导航路由切换 (Roteamento)
-    // ==========================================
+    // --- 第 7 阶段：导航路由 ---
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             navItems.forEach(nav => nav.classList.remove('active'));
             e.currentTarget.classList.add('active');
-
             const target = e.currentTarget.getAttribute('data-target');
-            if (target === 'home') {
-                renderMainDashboard(currentDays, currentScore);
-            } else if (target === 'premium') {
-                renderPremiumPage();
-            } else if (target === 'stats') {
-                mainContentEl.innerHTML = '<p style="text-align:center; margin-top:50px; color:#7f8c8d; font-weight:bold;">Estatísticas avançadas em breve... <br><br>(高级统计图表开发中...)</p>';
-            }
+            if (target === 'home') renderMainDashboard(currentDays, currentScore);
+            else if (target === 'premium') renderPremiumPage();
+            else if (target === 'stats') mainContentEl.innerHTML = '<p style="text-align:center; margin-top:50px; color:#7f8c8d; font-weight:bold;">Estatísticas avançadas em breve...</p>';
         });
     });
 
-    // ==========================================
-    // 核心初始化：读取数据库并挂载首页
-    // ==========================================
+    // --- 初始化数据库 ---
     try {
-        console.log('[Sistema] Tentando acessar o banco de dados... (尝试连接本地数据库)');
         const userData = await getUserProfile();
         currentDays = calculateContinuousDays(userData.startDateTimestamp);
         currentScore = userData.vitalityScore;
-        
         if(scoreValueEl) scoreValueEl.innerText = currentScore;
-        
-        // 初始进入 App，渲染首页仪表盘
         renderMainDashboard(currentDays, currentScore);
-
     } catch (error) {
-        console.error('Erro fatal ao iniciar:', error);
-        if(mainContentEl) {
-            mainContentEl.innerHTML = `
-                <div style="padding: 20px; text-align: center; margin-top: 50px;">
-                    <span style="font-size: 40px;">⚠️</span>
-                    <h3 style="color: #e74c3c; margin-top: 10px;">Erro de Inicialização</h3>
-                    <p style="color: #7f8c8d; font-size: 14px; margin-top: 10px;">
-                        Falha ao carregar o banco de dados.<br>
-                        Verifique se <b>database.js</b> e <b>psychology_domain.js</b> foram enviados para o GitHub.
-                    </p>
-                </div>
-            `;
-        }
+        console.error('Erro fatal:', error);
+        if(mainContentEl) mainContentEl.innerHTML = '<p style="color:red; text-align:center; margin-top:50px;">Erro de Inicialização do Banco de Dados.</p>';
     }
 
-    // ==========================================
-    // 渲染：首页仪表盘 (Dashboard Principal)
-    // ==========================================
+    // --- 渲染首页 ---
     function renderMainDashboard(days, score) {
         mainContentEl.innerHTML = `
             <div style="background: white; padding: 30px 20px; border-radius: 16px; text-align: center; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); animation: fadeIn 0.3s ease;">
@@ -115,34 +84,83 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
 
+        // 点击破戒，先触发 9.3 阻力弹窗！
         const btnRelapse = document.getElementById('btn-relapse');
-        if(btnRelapse) btnRelapse.addEventListener('click', () => showRelapseModal(score));
+        if(btnRelapse) btnRelapse.addEventListener('click', () => showFrictionModal(score));
         
         applyDynamicUI(days);
         renderHeatmap(days);
     }
 
     // ==========================================
-    // 第 4 阶段：动态阶段适配 (Máquina de Estados)
+    // 第 9.3 阶段：防冲动“3秒冷静”确认框 (Modal de Fricção)
     // ==========================================
+    function showFrictionModal(score) {
+        let frictionModal = document.getElementById('friction-modal');
+        if (!frictionModal) {
+            frictionModal = document.createElement('div');
+            frictionModal.id = 'friction-modal';
+            document.body.appendChild(frictionModal);
+        }
+
+        frictionModal.innerHTML = `
+            <div class="friction-content">
+                <span style="font-size: 40px;">🛑</span>
+                <h3 style="color: var(--text-color); margin: 10px 0;">Tem certeza? (你确定吗？)</h3>
+                <p style="color: #7f8c8d; font-size: 14px; line-height: 1.5;">Respire fundo. Esse impulso vai passar em alguns minutos. Você é mais forte que isso.</p>
+                
+                <button class="btn-cancel-friction" id="fric-cancel-btn">Não, sou mais forte! (我能坚持住)</button>
+                <button class="btn-confirm-friction" id="fric-confirm-btn" disabled>Sim, eu caí (3s...)</button>
+            </div>
+        `;
+        
+        frictionModal.classList.add('active');
+
+        const btnConfirm = document.getElementById('fric-confirm-btn');
+        const btnCancel = document.getElementById('fric-cancel-btn');
+
+        // 取消破戒，返回首页
+        btnCancel.onclick = () => {
+            frictionModal.classList.remove('active');
+            showToast('💪 Ótima decisão! Continue firme! (干得漂亮！)');
+        };
+
+        // 3秒倒计时逻辑
+        let timeLeft = 3;
+        const timer = setInterval(() => {
+            timeLeft--;
+            if (timeLeft > 0) {
+                btnConfirm.innerText = `Sim, eu caí (${timeLeft}s...)`;
+            } else {
+                clearInterval(timer);
+                btnConfirm.disabled = false;
+                btnConfirm.innerText = "Sim, eu caí (记录破戒)";
+            }
+        }, 1000);
+
+        // 倒计时结束后，点击进入问卷阶段
+        btnConfirm.onclick = () => {
+            clearInterval(timer);
+            frictionModal.classList.remove('active');
+            showRelapseModal(score); // 唤出结构化问卷
+        };
+    }
+
+    // --- 第 4 阶段：动态阶段适配 ---
     function applyDynamicUI(days) {
         const stageContainer = document.getElementById('dynamic-stage-container');
         if(!stageContainer) return;
-        
         let stageInfo = {};
 
         if (days <= 7) {
-            stageInfo = { title: "Fase de Abstinência (戒断防御期)", color: "#e67e22", icon: "🛡️", message: "O cérebro está exigindo dopamina. Mantenha a guarda alta." };
-            document.body.style.backgroundColor = "var(--bg-color)";
+            stageInfo = { title: "Fase de Abstinência", color: "#e67e22", icon: "🛡️", message: "O cérebro está exigindo dopamina. Mantenha a guarda alta." };
         } else if (days <= 14) {
-            stageInfo = { title: "Pico de Energia (能量激增期)", color: "#f39c12", icon: "⚡", message: "Canalize essa energia para um treino pesado ou estudos." };
-            document.body.style.backgroundColor = "var(--bg-color)";
+            stageInfo = { title: "Pico de Energia", color: "#f39c12", icon: "⚡", message: "Canalize essa energia para um treino pesado ou estudos." };
         } else if (days <= 60) {
-            stageInfo = { title: "Fase de Estabilização (平缓修复期)", color: "#3498db", icon: "🧠", message: "A névoa mental é normal agora. Descanse sem culpa." };
+            stageInfo = { title: "Fase de Estabilização", color: "#3498db", icon: "🧠", message: "A névoa mental é normal agora. Descanse sem culpa." };
             document.body.style.backgroundColor = "#e8f4f8"; 
         } else {
-            stageInfo = { title: "Equilíbrio (稳态掌控期)", color: "#2ecc71", icon: "🌱", message: "A clareza mental voltou. Continue esculpindo seus objetivos." };
-            document.body.style.backgroundColor = "var(--bg-color)";
+            stageInfo = { title: "Equilíbrio", color: "#2ecc71", icon: "🌱", message: "A clareza mental voltou. Continue esculpindo seus objetivos." };
         }
 
         stageContainer.innerHTML = `
@@ -155,33 +173,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    // ==========================================
-    // 第 6 阶段：热力图渲染 (Mapa de Calor)
-    // ==========================================
+    // --- 第 6 阶段：热力图渲染 ---
     function renderHeatmap(days) {
         const gridEl = document.getElementById('heatmap-grid');
         if(!gridEl) return;
-        
         const totalBoxes = 84; 
         let html = '';
         for (let i = 1; i <= totalBoxes; i++) {
-            if (i <= days) {
-                html += `<div style="width: 16px; height: 16px; border-radius: 3px; background-color: #2ecc71;"></div>`; 
-            } else {
-                html += `<div style="width: 16px; height: 16px; border-radius: 3px; background-color: #ebedf0;"></div>`; 
-            }
+            if (i <= days) html += `<div style="width: 16px; height: 16px; border-radius: 3px; background-color: #2ecc71;"></div>`; 
+            else html += `<div style="width: 16px; height: 16px; border-radius: 3px; background-color: #ebedf0;"></div>`; 
         }
         gridEl.innerHTML = html;
     }
 
-    // ==========================================
-    // 第 6 阶段：结构化问卷逻辑 (Modal de Recaída)
-    // ==========================================
+    // --- 第 6 阶段：结构化问卷逻辑 ---
     let selectedTrigger = null;
-
     function showRelapseModal(score) {
         if(!relapseModal) return;
-        
         relapseModal.classList.add('active');
         selectedTrigger = null; 
         
@@ -196,19 +204,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         });
 
-        document.getElementById('cancel-relapse-btn').onclick = () => {
-            relapseModal.classList.remove('active');
-        };
+        document.getElementById('cancel-relapse-btn').onclick = () => relapseModal.classList.remove('active');
 
         document.getElementById('confirm-relapse-btn').onclick = async () => {
             if (!selectedTrigger) {
-                alert('Por favor, selecione um gatilho. (请选择诱发原因以继续)');
+                showToast('⚠️ Selecione um gatilho para continuar. (请选择诱发原因)');
                 return;
             }
             
             const vitalitySystem = new VitalityScore(score);
             const newScore = vitalitySystem.recordRelapse('MÉDIA');
-            
             const userData = await getUserProfile();
             userData.vitalityScore = newScore;
             await saveUserProfile(userData);
@@ -217,31 +222,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    // ==========================================
-    // 第 7 阶段：Premium 销售页与 PIX 网关模拟
-    // ==========================================
+    // --- 第 7 阶段：Premium 销售页 ---
     function renderPremiumPage() {
         mainContentEl.innerHTML = `
             <div style="background: white; padding: 30px 20px; border-radius: 16px; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                 <div style="text-align: center; margin-bottom: 25px;">
                     <span style="font-size: 48px;">💎</span>
                     <h2 style="color: var(--text-color); margin-top: 10px;">Foco Premium</h2>
-                    <p style="color: #7f8c8d; font-size: 14px;">Domine sua mente. (掌控你的大脑)</p>
+                    <p style="color: #7f8c8d; font-size: 14px;">Domine sua mente.</p>
                 </div>
-
                 <ul style="list-style: none; padding: 0; margin-bottom: 30px; color: #34495e; line-height: 2; text-align: left;">
-                    <li>🔓 <strong style="color: var(--primary-color);">Gráficos de Calor Avançados</strong></li>
+                    <li>🔓 <strong style="color: var(--primary-color);">Gráficos Avançados</strong></li>
                     <li>🎧 <strong style="color: var(--primary-color);">Áudios de Terapia CBT</strong></li>
-                    <li>☁️ <strong style="color: var(--primary-color);">Backup Seguro em Nuvem</strong></li>
-                    <li>⚔️ <strong style="color: var(--primary-color);">Modo Batalha com Amigos</strong></li>
+                    <li>☁️ <strong style="color: var(--primary-color);">Backup em Nuvem</strong></li>
+                    <li>⚔️ <strong style="color: var(--primary-color);">Modo Batalha</strong></li>
                 </ul>
-
                 <div style="background: #f8f9fa; border: 2px solid #32BCAD; padding: 20px; border-radius: 12px; text-align: center; position: relative;">
                     <span style="background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; position: absolute; top: -12px; left: 10px;">-50% HOJE</span>
-                    <p style="font-weight: 800; color: #2c3e50; font-size: 18px;">Acesso Vitalício (终身买断)</p>
+                    <p style="font-weight: 800; color: #2c3e50; font-size: 18px;">Acesso Vitalício</p>
                     <p style="font-size: 36px; color: #32BCAD; font-weight: 900; margin: 10px 0;">R$ 49,90</p>
-                    <p style="font-size: 12px; color: #95a5a6; margin-bottom: 15px;">Pagamento único. Sem assinaturas. (无月租)</p>
-                    
                     <button id="pay-pix-btn" style="background: #32BCAD; color: white; width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 800; font-size: 16px; cursor: pointer;">
                         Pagar com PIX
                     </button>
@@ -252,9 +251,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('pay-pix-btn').addEventListener('click', () => {
             const pixCode = "00020126580014br.gov.bcb.pix0136..."; 
             navigator.clipboard.writeText(pixCode).then(() => {
-                alert('✓ Código PIX copiado! \n\n(PIX代码已复制，请打开您的银行 App 进行支付。)');
-            }).catch(err => {
-                alert('Erro ao gerar código PIX.');
+                showToast('✓ Código PIX copiado com sucesso! (PIX已复制)');
+            }).catch(() => {
+                showToast('❌ Erro ao gerar código PIX.');
             });
         });
     }
