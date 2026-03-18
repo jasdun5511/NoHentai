@@ -1,5 +1,5 @@
 /* =========================================
-   1. Variáveis Globais (全局变量 - 临床安抚色盘)
+   1. Variáveis Globais (全局变量)
    ========================================= */
 :root {
   --bg-color: #F4F7F6; 
@@ -10,7 +10,7 @@
 }
 
 /* =========================================
-   2. Reset & Comportamento Nativo (重置与原生行为)
+   2. Reset & Comportamento Nativo (重置)
    ========================================= */
 * {
   box-sizing: border-box;
@@ -23,20 +23,28 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg-color);
+  background-color: #e0e5ec; /* 电脑上的外围高级灰背景 */
   color: var(--text-color);
   overflow: hidden; 
   height: 100vh;
   width: 100vw;
+  /* 宽屏下整体居中，模拟手机视角 */
+  display: flex;
+  justify-content: center;
 }
 
 /* =========================================
-   3. Estrutura do Layout (布局结构)
+   3. Estrutura do Layout (核心手机模拟器布局)
    ========================================= */
 #app-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100%;
+  max-width: 480px; /* 限制最大宽度为手机尺寸 */
+  background-color: var(--bg-color);
+  position: relative; /* 为内部的 absolute 定位提供锚点 */
+  box-shadow: 0 0 40px rgba(0,0,0,0.1); 
 }
 
 #app-header {
@@ -77,6 +85,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  cursor: pointer;
 }
 
 .nav-item.active {
@@ -84,10 +93,10 @@ body {
 }
 
 /* =========================================
-   5. Botão de Pânico (恐慌悬浮按钮)
+   5. Botão de Pânico (恐慌急救按钮 - FAB)
    ========================================= */
 .fab-button {
-  position: fixed;
+  position: absolute; /* 锚定在 app-container 内部 */
   bottom: calc(var(--safe-bottom) + 70px); 
   right: 20px;
   width: 60px;
@@ -103,6 +112,7 @@ body {
   align-items: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   font-size: 24px;
+  cursor: pointer;
 }
 
 .fab-button:active {
@@ -111,10 +121,10 @@ body {
 }
 
 /* =========================================
-   6. Módulo de Emergência (急救覆盖层与呼吸动画)
+   6. Módulo de Emergência (急救覆盖层)
    ========================================= */
 #panic-overlay {
-    position: fixed;
+    position: fixed; /* 覆盖全屏幕，包括两边灰底 */
     top: 0; 
     left: 0; 
     width: 100vw; 
@@ -171,6 +181,7 @@ body {
 #close-panic-btn:active {
     background: rgba(255, 255, 255, 0.1);
 }
+
 /* =========================================
    7. Mapa de Calor (GitHub 风格热力图)
    ========================================= */
@@ -191,11 +202,9 @@ body {
 
 .heatmap-grid {
     display: grid;
-    /* 假设我们展示 12 周，每列 7 天 */
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: repeat(7, 1fr);
     gap: 4px;
-    /* 适配手机屏幕 */
     overflow-x: auto;
     padding-bottom: 10px;
 }
@@ -204,15 +213,15 @@ body {
     width: 16px;
     height: 16px;
     border-radius: 3px;
-    background-color: #ebedf0; /* 默认未打卡的灰色 */
+    background-color: #ebedf0; 
 }
 
 .day-box.success {
-    background-color: #2ecc71; /* 成功的绿色 */
+    background-color: #2ecc71; 
 }
 
 .day-box.relapse {
-    background-color: #e74c3c; /* 破戒的红色/也可设为更柔和的颜色 */
+    background-color: #e74c3c; 
 }
 
 /* =========================================
@@ -220,7 +229,10 @@ body {
    ========================================= */
 #relapse-modal {
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh;
     background: rgba(0, 0, 0, 0.6);
     z-index: 1000;
     display: flex;
@@ -286,32 +298,10 @@ body {
     font-weight: bold;
     cursor: pointer;
 }
+
 /* =========================================
-   9. Refinamento UX: Limite de Tela & Toast
+   9. Refinamento UX: Toast & Modal de Fricção
    ========================================= */
-
-/* 9.1 桌面端居中限制：让应用在电脑上也保持手机的比例 */
-body {
-    background-color: #e0e5ec; /* 在手机外围加一层淡淡的阴影背景 */
-    display: flex;
-    justify-content: center; /* 宽屏下整体居中 */
-}
-
-#app-container, #panic-overlay {
-    width: 100%;
-    max-width: 480px; /* 限制最大宽度，模拟手机屏幕 */
-    background-color: var(--bg-color);
-    position: relative;
-    box-shadow: 0 0 40px rgba(0,0,0,0.1); /* 给模拟器加上高级阴影 */
-}
-
-#bottom-bar {
-    max-width: 480px;
-    margin: 0 auto;
-    left: 0; right: 0; /* 确保底部导航栏也跟随居中 */
-}
-
-/* 9.2 优雅的 Toast 通知组件 (Notificação Toast) */
 .toast-notification {
     position: fixed;
     top: 20px;
@@ -334,45 +324,65 @@ body {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
-/* =========================================
-   9. Refinamento UX: Toast & Modal de Fricção
-   ========================================= */
 
-/* 9.2 优雅的 Toast 通知组件 */
-.toast-notification {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px);
-    background-color: #2c3e50; color: white; padding: 12px 24px; border-radius: 30px;
-    font-size: 14px; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    z-index: 10000;
-}
-.toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* 9.3 防冲动“3秒冷静”确认框 */
 #friction-modal {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(44, 62, 80, 0.95); /* 深色沉浸背景 */
-    z-index: 1000; display: flex; justify-content: center; align-items: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh;
+    background: rgba(44, 62, 80, 0.95);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
-#friction-modal.active { opacity: 1; pointer-events: auto; }
+
+#friction-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
 
 .friction-content {
-    background: white; width: 90%; max-width: 350px; padding: 30px;
-    border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    background: white;
+    width: 90%;
+    max-width: 350px;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* 鼓励放弃破戒的醒目按钮 */
 .btn-cancel-friction {
-    background: var(--primary-color); color: white; border: none;
-    padding: 15px; width: 100%; border-radius: 12px; font-weight: 800;
-    font-size: 16px; margin-top: 20px; cursor: pointer; box-shadow: 0 4px 15px rgba(76, 161, 175, 0.4);
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 15px;
+    width: 100%;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 16px;
+    margin-top: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(76, 161, 175, 0.4);
 }
 
-/* 锁定中的破戒按钮 */
 .btn-confirm-friction {
-    background: transparent; color: #e74c3c; border: none;
-    padding: 10px; width: 100%; margin-top: 10px; cursor: pointer;
-    font-size: 14px; transition: opacity 0.3s;
+    background: transparent;
+    color: #e74c3c;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.3s;
 }
-.btn-confirm-friction:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-confirm-friction:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
