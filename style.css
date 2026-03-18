@@ -171,3 +171,118 @@ body {
 #close-panic-btn:active {
     background: rgba(255, 255, 255, 0.1);
 }
+/* =========================================
+   7. Mapa de Calor (GitHub 风格热力图)
+   ========================================= */
+.heatmap-container {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    margin-top: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.heatmap-title {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.heatmap-grid {
+    display: grid;
+    /* 假设我们展示 12 周，每列 7 天 */
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 4px;
+    /* 适配手机屏幕 */
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.day-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    background-color: #ebedf0; /* 默认未打卡的灰色 */
+}
+
+.day-box.success {
+    background-color: #2ecc71; /* 成功的绿色 */
+}
+
+.day-box.relapse {
+    background-color: #e74c3c; /* 破戒的红色/也可设为更柔和的颜色 */
+}
+
+/* =========================================
+   8. Modal de Recaída (复盘问卷弹窗)
+   ========================================= */
+#relapse-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+#relapse-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 400px;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-title {
+    color: var(--text-color);
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.trigger-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.trigger-btn {
+    padding: 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 8px;
+    background: transparent;
+    color: #7f8c8d;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.trigger-btn.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(76, 161, 175, 0.1);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.submit-relapse {
+    width: 100%;
+    padding: 14px;
+    background: var(--panic-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
